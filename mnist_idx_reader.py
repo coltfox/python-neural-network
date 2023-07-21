@@ -38,7 +38,10 @@ class IDX1Reader(BinaryReader):
         return filepath.endswith("idx3-ubyte")
 
     def buffer_to_arr(self) -> NDArray[np.uint8]:
-        return np.frombuffer(self.buffer.read(), dtype=np.ubyte, offset=self.LABEL_OFFSET)
+        ubyte_big_endian = np.dtype(np.ubyte)
+        ubyte_big_endian.newbyteorder(">")
+
+        return np.frombuffer(self.buffer.read(), dtype=ubyte_big_endian, offset=self.LABEL_OFFSET)
 
 
 class IDX3Reader(BinaryReader):
@@ -65,4 +68,7 @@ class IDX3Reader(BinaryReader):
         self.buffer.seek(self.COLS_OFFSET)
         num_cols = self.read_idx_int32()
 
-        return np.dtype((np.ubyte, (num_rows, num_cols)))
+        pixel_grid_dt = np.dtype((np.ubyte, (num_rows, num_cols)))
+        pixel_grid_dt.newbyteorder(">")
+
+        return pixel_grid_dt
